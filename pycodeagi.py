@@ -147,18 +147,28 @@ class PyCodeAGI(Chain, BaseModel):
         )
 
 
-# TODO: Get user input here
-objective = "weather app"
-llm = OpenAI(temperature=0.8, max_tokens=300)
-verbose = True
-max_iterations: Optional[int] = 3
+def run_pycode_agi(objective: str) -> str:
+    llm = OpenAI(temperature=0.8, max_tokens=300)
+    verbose = True
+    max_iterations: Optional[int] = 3
 
-# Initialize our agent
-pycode_agi = PyCodeAGI.from_llm(
-    llm=llm,
-    verbose=verbose,
-    max_iterations=max_iterations
+    # Initialize our agent
+    pycode_agi = PyCodeAGI.from_llm(
+        llm=llm,
+        verbose=verbose,
+        max_iterations=max_iterations
+    )
+
+    # Run the agent and return the generated code
+    pycode_agi({"objective": objective})
+    return generated_code
+
+# Create Gradio UI
+iface = gr.Interface(
+    fn=run_pycode_agi,
+    inputs=gr.inputs.Textbox(lines=2, placeholder="Enter your objective..."),
+    outputs=gr.outputs.Textbox(),
+    title="PyCode AGI",
+    description="Generate Python code based on your objective using OpenAI's GPT model.",
 )
-
-# Run the agent and witness the MAGIC!
-pycode_agi({"objective": objective})
+iface.launch()
